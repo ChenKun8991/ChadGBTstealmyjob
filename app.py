@@ -127,7 +127,8 @@ class Tour(db.Model):
     rating = db.Column(db.Float, nullable=False) 
     description = db.Column(db.String(2000), nullable=False)
     created_at = db.Column(db.TIMESTAMP, server_default=db.func.current_timestamp(), nullable=False)
-    
+    link = db.Column(db.String(200), nullable=False)
+
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship('User', backref=db.backref('tours', cascade='all, delete', lazy=True))
 
@@ -185,7 +186,8 @@ def get_tours(tour_id=None):
             'name': tour.name,
             'rating': tour.rating,
             'description': tour.description,
-            'created_at': tour.created_at
+            'created_at': tour.created_at,
+            'link': tour.link
             # Add more fields if needed
         }
         return jsonify(tour_data)
@@ -198,7 +200,9 @@ def get_tours(tour_id=None):
                 'name': tour.name,
                 'rating': tour.rating,
                 'description': tour.description,
-                'created_at': tour.created_at
+                'created_at': tour.created_at,
+                'link': tour.link
+
                 # Add more fields if needed
             }
             tour_list.append(tour_data)
@@ -214,7 +218,9 @@ def get_tours_by_user_id(user_id):
             'name': tour.name,
             'rating': tour.rating,
             'description': tour.description,
-            'created_at': tour.created_at
+            'created_at': tour.created_at,
+            'link': tour.link
+
             # Add more fields if needed
         }
         tour_list.append(tour_data)
@@ -227,7 +233,8 @@ def create_tour():
     rating = data.get('rating')
     description = data.get('description')
     user_id= data.get('user_id')
-    new_tour = Tour(name=name, rating=rating, description=description, user_id = user_id)
+    link= data.get('link')
+    new_tour = Tour(name=name, rating=rating, description=description, user_id = user_id, link = link)
     db.session.add(new_tour)
     db.session.commit()
 
@@ -669,13 +676,13 @@ def populate_data():
     # Create and insert dummy data for Tour table
     tour1 = Tour(name='SMU Tour', rating=4.9, 
                  description='Dynamic city campus in bustling metropolis. Modern facilities, vibrant atmosphere, close to businesses and attractions. Endless opportunities.',
-                 created_at=datetime.now(), user_id=1)
+                 created_at=datetime.now(), user_id=1, link = "picture/smu/01")
     tour3 = Tour(name='NTU Tour', rating=4.1, 
                  description='NTU Tour.',
-                 created_at=datetime.now(), user_id=1)
+                 created_at=datetime.now(), user_id=1,  link = "picture/ntu/01")
     tour2 = Tour(name='NUS Tour', rating=4.3, 
                  description="Explore Singapore's prestigious National University of Singapore. Stunning campus, cutting-edge facilities, rich academic environment. Discover excellence in education and research."
-                 , created_at=datetime.now(), user_id=2)
+                 , created_at=datetime.now(), user_id=2, link = "picture/nus/01")
 
     db.session.add(tour1)
     db.session.add(tour2)

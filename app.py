@@ -1,6 +1,7 @@
-from flask import Flask
+from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from flask import jsonify
+from datetime import datetime
+
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:password123@localhost/mydatabase'
@@ -21,11 +22,11 @@ class Itinerary(db.Model):
     itinerary = db.Column(db.String(2000), nullable=False)
 
     tour_id = db.Column(db.Integer, db.ForeignKey('tour.id'), nullable=False)
-    user = db.relationship('Tour', backref=db.backref('itineraries', lazy=True))
+    tour = db.relationship('Tour', backref=db.backref('itineraries', lazy=True))
 
 class HighLight(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    hightlight = db.Column(db.String(2000), nullable=False)
+    highlight = db.Column(db.String(2000), nullable=False)
 
     tour_id = db.Column(db.Integer, db.ForeignKey('tour.id'), nullable=False)
     tour = db.relationship('Tour', backref=db.backref('hightlights', lazy=True))
@@ -39,7 +40,7 @@ class User(db.Model):
 class Video(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
-    like = db.Column(db.Integer, nullable=False)  
+    thumb_up = db.Column(db.Integer, nullable=False)  
     view_count  = db.Column(db.Integer, nullable=False) 
     created_at = db.Column(db.TIMESTAMP, server_default=db.func.current_timestamp(), nullable=False)
     link = db.Column(db.String(200), nullable=False)
@@ -56,7 +57,8 @@ class Comment(db.Model):
     
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship('User', backref=db.backref('comments', lazy=True))
-    
+
+
 @app.route('/tours', methods=['GET'])
 def get_tours():
     tours = Tour.query.all()
@@ -122,7 +124,7 @@ def get_videos():
         video_data = {
             'id': video.id,
             'name': video.name,
-            'like': video.like,
+            'thumb_up': video.thumb_up,
             'view_count': video.view_count,
             'created_at': video.created_at,
             'link': video.link
@@ -144,15 +146,21 @@ def get_comments():
         comment_list.append(comment_data)
     return jsonify(comment_list)
 
-# Insert dummy data
-if __name__ == '__main__':
+
+def populate_data():
+    # Create and insert dummy data for User table
+    user1 = User(name='User 1', email='user1@example.com', created_at=datetime.now())
+    user2 = User(name='User 2', email='user2@example.com', created_at=datetime.now())
+
+    db.session.add(user1)
+    db.session.add(user2)
+
     # Create and insert dummy data for Tour table
     tour1 = Tour(name='Tour 1', rating=4.5, description='Description 1', created_at=datetime.now(), user_id=1)
     tour2 = Tour(name='Tour 2', rating=3.8, description='Description 2', created_at=datetime.now(), user_id=2)
 
     db.session.add(tour1)
     db.session.add(tour2)
-    db.session.commit()
 
     # Create and insert dummy data for Itinerary table
     itinerary1 = Itinerary(itinerary='Itinerary 1', tour_id=1)
@@ -160,7 +168,6 @@ if __name__ == '__main__':
 
     db.session.add(itinerary1)
     db.session.add(itinerary2)
-    db.session.commit()
 
     # Create and insert dummy data for HighLight table
     highlight1 = HighLight(highlight='Highlight 1', tour_id=1)
@@ -168,23 +175,13 @@ if __name__ == '__main__':
 
     db.session.add(highlight1)
     db.session.add(highlight2)
-    db.session.commit()
-
-    # Create and insert dummy data for User table
-    user1 = User(name='User 1', email='user1@example.com', created_at=datetime.now())
-    user2 = User(name='User 2', email='user2@example.com', created_at=datetime.now())
-
-    db.session.add(user1)
-    db.session.add(user2)
-    db.session.commit()
 
     # Create and insert dummy data for Video table
-    video1 = Video(name='Video 1', like=10, view_count=100, created_at=datetime.now(), link='video1.mp4', user_id=1)
-    video2 = Video(name='Video 2', like=5, view_count=50, created_at=datetime.now(), link='video2.mp4', user_id=2)
+    video1 = Video(name='Video 1', thumb_up=10, view_count=100, created_at=datetime.now(), link='video1.mp4', user_id=1)
+    video2 = Video(name='Video 2', thumb_up=5, view_count=50, created_at=datetime.now(), link='video2.mp4', user_id=2)
 
     db.session.add(video1)
     db.session.add(video2)
-    db.session.commit()
 
     # Create and insert dummy data for Comment table
     comment1 = Comment(description='Comment 1', video_id=1, user_id=1)
@@ -193,5 +190,11 @@ if __name__ == '__main__':
     db.session.add(comment1)
     db.session.add(comment2)
     db.session.commit()
-
+    
+# Insert dummy data
+if __name__ == '__main__':
+    with app.app_context():
+        print("pass")
+        db.create_all()
+        populate_data()
     app.run()

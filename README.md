@@ -8,6 +8,12 @@
 
 #env\Scripts\activate.bat
 
+#flask shell
+
 #from app import db
 
 #db.create_all()
+
+#exit()
+
+#python app.py

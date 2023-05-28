@@ -150,6 +150,9 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(50), nullable=False, unique=True)
+    link = db.Column(db.String(200), nullable=False)
+    thumb_up = db.Column(db.Integer, nullable=False)  
+
     created_at = db.Column(db.TIMESTAMP, server_default=db.func.current_timestamp(), nullable=False)
 
 class Video(db.Model):
@@ -159,6 +162,7 @@ class Video(db.Model):
     view_count  = db.Column(db.Integer, nullable=False) 
     created_at = db.Column(db.TIMESTAMP, server_default=db.func.current_timestamp(), nullable=False)
     link = db.Column(db.String(200), nullable=False)
+    p_link = db.Column(db.String(200), nullable=False)
     
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship('User', backref=db.backref('videos', cascade='all, delete', lazy=True))
@@ -425,7 +429,8 @@ def get_users(user_id=None):
                 'id': user.id,
                 'name': user.name,
                 'email': user.email,
-                'created_at': user.created_at
+                'created_at': user.created_at,
+                'link': user.link,
                 # Add more fields if needed
             }
             user_list.append(user_data)
@@ -436,7 +441,8 @@ def get_users(user_id=None):
             'id': user.id,
             'name': user.name,
             'email': user.email,
-            'created_at': user.created_at
+            'created_at': user.created_at,
+            'link': user.link,
             # Add more fields if needed
         }
         return jsonify(user_data)
@@ -446,11 +452,12 @@ def create_user():
     data = request.get_json()
     name = data.get('name')
     email = data.get('email')
+    link = data.get('link')
 
-    if not name or not email:
-        return jsonify({'message': 'Name and email are required'}), 400
+    if not name or not email or not link:
+        return jsonify({'message': 'Name, email and photo are required'}), 400
 
-    new_user = User(name=name, email=email)
+    new_user = User(name=name, email=email, link=link)
     db.session.add(new_user)
     db.session.commit()
 
@@ -495,6 +502,7 @@ def get_videos(video_id=None):
                 'view_count': video.view_count,
                 'created_at': video.created_at,
                 'link': video.link,
+                'p_link': video.p_link
                 # Add more fields if needed
             }
             video_list.append(video_data)
@@ -508,6 +516,7 @@ def get_videos(video_id=None):
             'view_count': video.view_count,
             'created_at': video.created_at,
             'link': video.link,
+            'p_link': video.p_link
         }
         return jsonify(video_data)
 
@@ -524,6 +533,7 @@ def get_videos_by_user(user_id):
             'view_count': video.view_count,
             'created_at': video.created_at,
             'link': video.link,
+            'p_link': video.p_link
             # Add more fields if needed
         }
         video_list.append(video_data)
@@ -533,7 +543,7 @@ def get_videos_by_user(user_id):
 @app.route('/videos', methods=['POST'])
 def create_video():
     data = request.get_json()
-    video = Video(name=data['name'], thumb_up=data['thumb_up'], view_count=data['view_count'], link=data['link'], user_id=data['user_id'])
+    video = Video(name=data['name'], thumb_up=data['thumb_up'], view_count=data['view_count'], link=data['link'], user_id=data['user_id'], p_link=data['p_link'])
     db.session.add(video)
     db.session.commit()
     return jsonify({'message': 'Video created successfully', 'id': video.id})
@@ -545,7 +555,6 @@ def update_video(video_id):
     video.name = data['name']
     video.thumb_up = data['thumb_up']
     video.view_count = data['view_count']
-    video.link = data['link']
     db.session.commit()
     return jsonify({'message': 'Video updated successfully'})
 
@@ -667,8 +676,8 @@ def delete_comment(comment_id):
 
 def populate_data():
     # Create and insert dummy data for User table
-    user1 = User(name='DAI Bing Tian', email='btdai@smu.edu.sg', created_at=datetime.now())
-    user2 = User(name='Divesh AGGARWAL', email='divesh@comp.nus.edu.sg', created_at=datetime.now())
+    user1 = User(name='DAI Bing Tian', email='btdai@smu.edu.sg', created_at=datetime.now(), link="smu/01")
+    user2 = User(name='Divesh AGGARWAL', email='divesh@comp.nus.edu.sg', created_at=datetime.now(), link="nus/01")
 
     db.session.add(user1)
     db.session.add(user2)
@@ -728,8 +737,8 @@ def populate_data():
     db.session.add(highlight2_1)
 
     # Create and insert dummy data for Video table
-    video1 = Video(name='Video 1', thumb_up=0, view_count=0, link='video1.mp4', user_id=1)
-    video2 = Video(name='Video 2', thumb_up=0, view_count=0, link='video2.mp4', user_id=2)
+    video1 = Video(name='Video 1', thumb_up=0, view_count=0, link='video1.mp4', p_link="smu/video_cover_01", user_id=1)
+    video2 = Video(name='Video 2', thumb_up=0, view_count=0, link='video2.mp4', p_link="nus/video_cover_01", user_id=2)
     
     db.session.add(video1)
     db.session.add(video2)

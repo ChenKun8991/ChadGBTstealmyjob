@@ -204,6 +204,22 @@ def get_tours(tour_id=None):
             tour_list.append(tour_data)
         return jsonify(tour_list)
 
+@app.route('/tours/user/<int:user_id>', methods=['GET'])
+def get_tours_by_user_id(user_id):
+    tours = Tour.query.filter_by(user_id=user_id).all()
+    tour_list = []
+    for tour in tours:
+        tour_data = {
+            'id': tour.id,
+            'name': tour.name,
+            'rating': tour.rating,
+            'description': tour.description,
+            'created_at': tour.created_at
+            # Add more fields if needed
+        }
+        tour_list.append(tour_data)
+    return jsonify(tour_list)
+
 @app.route('/tours', methods=['POST'])
 def create_tour():
     data = request.get_json()  
@@ -259,6 +275,18 @@ def get_itineraries(itinerary_id=None):
             itinerary_list.append(itinerary_data)
         return jsonify(itinerary_list)
 
+@app.route('/tours/itineraries/<int:tour_id>', methods=['GET'])
+def get_itineraries_by_tour_id(tour_id):
+    itineraries = Itinerary.query.filter_by(tour_id=tour_id).all()
+    itinerary_list = []
+    for itinerary in itineraries:
+        itinerary_data = {
+            'id': itinerary.id,
+            'itinerary': itinerary.itinerary,
+            # Add more fields if needed
+        }
+        itinerary_list.append(itinerary_data)
+    return jsonify(itinerary_list)
 
 @app.route('/itineraries', methods=['POST'])
 def create_itinerary():
@@ -326,6 +354,19 @@ def get_highlights(highlight_id=None):
             highlight_list.append(highlight_data)
         
         return jsonify(highlight_list)
+
+@app.route('/tours/highlights/<int:tour_id>', methods=['GET'])
+def get_highlights_by_tour_id(tour_id):
+    highlights = HighLight.query.filter_by(tour_id=tour_id).all()
+    highlight_list = []
+    for highlight in highlights:
+        highlight_data = {
+            'id': highlight.id,
+            'highlight': highlight.highlight,
+            # Add more fields if needed
+        }
+        highlight_list.append(highlight_data)
+    return jsonify(highlight_list)
 
 @app.route('/highlights', methods=['POST'])
 def create_highlight():
@@ -431,6 +472,7 @@ def delete_user(user_id):
     db.session.commit()
 
     return jsonify({'message': 'User deleted successfully'})
+
 # Videos CRUD
 @app.route('/videos', methods=['GET'])
 @app.route('/videos/<int:video_id>', methods=['GET'])
@@ -462,6 +504,24 @@ def get_videos(video_id=None):
         }
         return jsonify(video_data)
 
+@app.route('/videos/user/<int:user_id>', methods=['GET'])
+def get_videos_by_user(user_id):
+    videos = Video.query.filter_by(user_id=user_id).all()
+
+    video_list = []
+    for video in videos:
+        video_data = {
+            'id': video.id,
+            'name': video.name,
+            'thumb_up': video.thumb_up,
+            'view_count': video.view_count,
+            'created_at': video.created_at,
+            'link': video.link,
+            # Add more fields if needed
+        }
+        video_list.append(video_data)
+
+    return jsonify(video_list)
 
 @app.route('/videos', methods=['POST'])
 def create_video():
@@ -481,6 +541,17 @@ def update_video(video_id):
     video.link = data['link']
     db.session.commit()
     return jsonify({'message': 'Video updated successfully'})
+
+def increment_view_count(video_id):
+    video = Video.query.get_or_404(video_id)
+    video.view_count += 1
+    db.session.commit()
+
+
+@app.route('/videos/increment_view_count/<int:video_id>', methods=['PUT'])
+def increment_view_count_endpoint(video_id):
+    increment_view_count(video_id)
+    return jsonify({'message': 'View count incremented successfully'})
 
 @app.route('/videos/<int:video_id>', methods=['DELETE'])
 def delete_video(video_id):
@@ -511,6 +582,38 @@ def get_comments(comment_id = None):
         # Add more fields if needed
     }
     return jsonify(comment_data)
+
+
+@app.route('/comments/user/<int:user_id>', methods=['GET'])
+def get_comments_by_user(user_id):
+    comments = Comment.query.filter_by(user_id=user_id).all()
+
+    comment_list = []
+    for comment in comments:
+        comment_data = {
+            'id': comment.id,
+            'description': comment.description,
+            # Add more fields if needed
+        }
+        comment_list.append(comment_data)
+
+    return jsonify(comment_list)
+
+
+@app.route('/comments/video/<int:video_id>', methods=['GET'])
+def get_comments_by_video(video_id):
+    comments = Comment.query.filter_by(video_id=video_id).all()
+
+    comment_list = []
+    for comment in comments:
+        comment_data = {
+            'id': comment.id,
+            'description': comment.description,
+            # Add more fields if needed
+        }
+        comment_list.append(comment_data)
+
+    return jsonify(comment_list)
 
 @app.route('/comments', methods=['POST'])
 def create_comment():
@@ -557,43 +660,76 @@ def delete_comment(comment_id):
 
 def populate_data():
     # Create and insert dummy data for User table
-    user1 = User(name='User 1', email='user1@example.com', created_at=datetime.now())
-    user2 = User(name='User 2', email='user2@example.com', created_at=datetime.now())
+    user1 = User(name='DAI Bing Tian', email='btdai@smu.edu.sg', created_at=datetime.now())
+    user2 = User(name='Divesh AGGARWAL', email='divesh@comp.nus.edu.sg', created_at=datetime.now())
 
     db.session.add(user1)
     db.session.add(user2)
 
     # Create and insert dummy data for Tour table
-    tour1 = Tour(name='Tour 1', rating=4.5, description='Description 1', created_at=datetime.now(), user_id=1)
-    tour2 = Tour(name='Tour 2', rating=3.8, description='Description 2', created_at=datetime.now(), user_id=2)
+    tour1 = Tour(name='SMU Tour', rating=4.9, 
+                 description='Dynamic city campus in bustling metropolis. Modern facilities, vibrant atmosphere, close to businesses and attractions. Endless opportunities.',
+                 created_at=datetime.now(), user_id=1)
+    tour3 = Tour(name='NTU Tour', rating=4.1, 
+                 description='NTU Tour.',
+                 created_at=datetime.now(), user_id=1)
+    tour2 = Tour(name='NUS Tour', rating=4.3, 
+                 description="Explore Singapore's prestigious National University of Singapore. Stunning campus, cutting-edge facilities, rich academic environment. Discover excellence in education and research."
+                 , created_at=datetime.now(), user_id=2)
 
     db.session.add(tour1)
     db.session.add(tour2)
+    db.session.add(tour3)
 
     # Create and insert dummy data for Itinerary table
-    itinerary1 = Itinerary(itinerary='Itinerary 1', tour_id=1)
-    itinerary2 = Itinerary(itinerary='Itinerary 2', tour_id=2)
+    
+    itinerary1_0 = Itinerary(itinerary='Start at the SMU Administration Building: Begin your SMU campus tour by visiting the iconic Administration Building, which showcases a beautiful blend of modern and colonial architectural styles. Take in the impressive facade and learn about the history and significance of this central landmark.', tour_id=1)
+    itinerary1_1 = Itinerary(itinerary="Explore the Lee Kong Chian School of Business: Delve into the world of business education at SMU's renowned Lee Kong Chian School of Business. Discover the innovative programs, cutting-edge facilities, and vibrant learning environment that prepare students for leadership roles in the business world.", tour_id=1)
+    itinerary1_2 = Itinerary(itinerary="Visit the SMU Green: Conclude your campus tour by experiencing the lively atmosphere at the SMU Green. This outdoor space serves as a hub for student activities, events, and social gatherings. Take a moment to relax, soak in the vibrant campus energy, and appreciate the sense of community that thrives at SMU.", tour_id=1)
 
-    db.session.add(itinerary1)
-    db.session.add(itinerary2)
+    itinerary2_0 = Itinerary(itinerary='Start at the University Town (UTown): Visit the vibrant hub with residential colleges, dining options, and recreational facilities.', tour_id=2)
+    itinerary2_1 = Itinerary(itinerary='Proceed to the Central Library: Explore the state-of-the-art library with extensive resources and study spaces.', tour_id=2)
+    itinerary2_2 = Itinerary(itinerary='Head to the iconic University Cultural Centre (UCC): Marvel at its modern architecture and check out the events and performances happening.', tour_id=2)
+    itinerary2_3 = Itinerary(itinerary='Visit the School of Computing: Discover the innovative programs and technologies shaping the future.', tour_id=2)
+    itinerary2_4 = Itinerary(itinerary='Explore the Faculty of Arts and Social Sciences: Learn about the diverse range of disciplines and academic opportunities.', tour_id=2)
+    itinerary2_5 = Itinerary(itinerary='Stop by the NUS Museum: Engage with intriguing art exhibitions and cultural artifacts.', tour_id=2)
+    itinerary2_6 = Itinerary(itinerary='End the tour at the Sports Facilities: Experience the fitness centers, sports fields, and recreational amenities available to students.', tour_id=2)
+        
+    db.session.add(itinerary1_0)
+    db.session.add(itinerary1_1)
+    db.session.add(itinerary1_2)
+      
+    db.session.add(itinerary2_0)
+    db.session.add(itinerary2_1)
+    db.session.add(itinerary2_2)
+    db.session.add(itinerary2_3)
+    db.session.add(itinerary2_4)
+    db.session.add(itinerary2_5)
+    db.session.add(itinerary2_6)
 
     # Create and insert dummy data for HighLight table
-    highlight1 = HighLight(highlight='Highlight 1', tour_id=1)
-    highlight2 = HighLight(highlight='Highlight 2', tour_id=2)
+    highlight1_0 = HighLight(highlight='Prime city center location.', tour_id=1)
+    highlight1_1 = HighLight(highlight='Interdisciplinary education and innovation.', tour_id=1)
+    
+    highlight2_0 = HighLight(highlight='Extensive range of academic programs', tour_id=2)
+    highlight2_1 = HighLight(highlight='Vibrant campus community.', tour_id=2)
 
-    db.session.add(highlight1)
-    db.session.add(highlight2)
+    db.session.add(highlight1_0)
+    db.session.add(highlight1_1)
+    
+    db.session.add(highlight2_0)
+    db.session.add(highlight2_1)
 
     # Create and insert dummy data for Video table
-    video1 = Video(name='Video 1', thumb_up=10, view_count=100, link='video1.mp4', user_id=1)
-    video2 = Video(name='Video 2', thumb_up=5, view_count=50, link='video2.mp4', user_id=2)
+    video1 = Video(name='Video 1', thumb_up=0, view_count=0, link='video1.mp4', user_id=1)
+    video2 = Video(name='Video 2', thumb_up=0, view_count=0, link='video2.mp4', user_id=2)
     
     db.session.add(video1)
     db.session.add(video2)
 
     # Create and insert dummy data for Comment table
-    comment1 = Comment(description='Comment 1', video_id=1, user_id=1)
-    comment2 = Comment(description='Comment 2', video_id=2, user_id=2)
+    comment1 = Comment(description='Great tour', video_id=1, user_id=1)
+    comment2 = Comment(description='Fun tour', video_id=2, user_id=2)
 
     db.session.add(comment1)
     db.session.add(comment2)

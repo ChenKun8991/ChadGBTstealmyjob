@@ -1,28 +1,23 @@
 from flask import Flask
-from flask_mysqldb import MySQL
+from flask_sqlalchemy import SQLAlchemy
+
 
 app = Flask(__name__)
-app.config['MYSQL_HOST'] = 'localhost'  # MySQL server host
-app.config['MYSQL_USER'] = 'root'  # MySQL username
-app.config['MYSQL_PASSWORD'] = 's9927714i'  # MySQL password
-app.config['MYSQL_DB'] = 'mydatabase'  # MySQL database name
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:s9927714i@localhost/mydatabase'
+db = SQLAlchemy(app)
 
-mysql = MySQL(app)
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False)
+    email = db.Column(db.String(50), nullable=False)
+    created_at = db.Column(db.TIMESTAMP, server_default=db.func.current_timestamp(), nullable=False)
 
 @app.route('/')
 def index():
-    # Perform a MySQL query
-    cur = mysql.connection.cursor()
-    cur.execute('SELECT * FROM users')
-    results = cur.fetchall()
-    cur.close()
+    # Create all tables defined in the models
+    db.create_all()
     
-    # Process the query results
-    output = ''
-    for row in results:
-        output += f'ID: {row[0]}, Name: {row[1]}, Email: {row[2]}\n'
-        
-    return output
+    return "Tables created successfully!"
 
 if __name__ == '__main__':
     app.run()

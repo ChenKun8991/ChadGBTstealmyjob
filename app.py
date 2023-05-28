@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
@@ -10,7 +10,7 @@ db = SQLAlchemy(app)
 class Tour(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
-    rating = db.Column(db.Float, nullable=False)  # Changed to Float instead of Double
+    rating = db.Column(db.Float, nullable=False) 
     description = db.Column(db.String(2000), nullable=False)
     created_at = db.Column(db.TIMESTAMP, server_default=db.func.current_timestamp(), nullable=False)
     
@@ -22,14 +22,14 @@ class Itinerary(db.Model):
     itinerary = db.Column(db.String(2000), nullable=False)
 
     tour_id = db.Column(db.Integer, db.ForeignKey('tour.id'), nullable=False)
-    tour = db.relationship('Tour', backref=db.backref('itineraries', lazy=True))
+    tour = db.relationship('Tour', backref=db.backref('itineraries', cascade='all, delete', lazy=True))
 
 class HighLight(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     highlight = db.Column(db.String(2000), nullable=False)
 
-    tour_id = db.Column(db.Integer, db.ForeignKey('tour.id'), nullable=False)
-    tour = db.relationship('Tour', backref=db.backref('hightlights', lazy=True))
+    tour_id = db.Column(db.Integer,  db.ForeignKey('tour.id'), nullable=False)
+    tour = db.relationship('Tour',backref=db.backref('highlights', cascade='all, delete', lazy=True))
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -46,19 +46,19 @@ class Video(db.Model):
     link = db.Column(db.String(200), nullable=False)
     
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    user = db.relationship('User', backref=db.backref('videos', lazy=True))
+    user = db.relationship('User', backref=db.backref('videos', cascade='all, delete', lazy=True))
 
 class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     description = db.Column(db.String(2000), nullable=False)
 
     video_id = db.Column(db.Integer, db.ForeignKey('video.id'), nullable=False)
-    video = db.relationship('Video', backref=db.backref('comments', lazy=True))
+    video = db.relationship('Video', backref=db.backref('comments', cascade='all, delete', lazy=True))
     
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    user = db.relationship('User', backref=db.backref('comments', lazy=True))
+    user = db.relationship('User', backref=db.backref('comments', cascade='all, delete', lazy=True))
 
-
+#Tours 
 @app.route('/tours', methods=['GET'])
 def get_tours():
     tours = Tour.query.all()
@@ -75,6 +75,36 @@ def get_tours():
         tour_list.append(tour_data)
     return jsonify(tour_list)
 
+@app.route('/tours', methods=['POST'])
+def create_tour():
+    data = request.get_json()  
+    name = data.get('name')
+    rating = data.get('rating')
+    description = data.get('description')
+    user_id= data.get('user_id')
+    new_tour = Tour(name=name, rating=rating, description=description, user_id = user_id)
+    db.session.add(new_tour)
+    db.session.commit()
+
+    return jsonify({'message': 'Tour created successfully', 'id': new_tour.id}), 201
+
+@app.route('/tours/<int:tour_id>', methods=['PUT'])
+def edit_tour(tour_id):
+    tour = Tour.query.get_or_404(tour_id)
+    data = request.get_json()
+    tour.name = data.get('name', tour.name)
+    tour.rating = data.get('rating', tour.rating)
+    tour.description = data.get('description', tour.description)
+    db.session.commit()
+    return jsonify({'message': 'Tour updated successfully'})
+
+@app.route('/tours/<int:tour_id>', methods=['DELETE'])
+def delete_tour(tour_id):
+    tour = Tour.query.get_or_404(tour_id)
+    db.session.delete(tour)
+    db.session.commit()
+    return jsonify({'message': 'Tour deleted successfully'})
+
 @app.route('/itineraries', methods=['GET'])
 def get_itineraries():
     itineraries = Itinerary.query.all()
@@ -88,6 +118,48 @@ def get_itineraries():
         itinerary_list.append(itinerary_data)
     return jsonify(itinerary_list)
 
+@app.route('/itineraries', methods=['POST'])
+def create_itinerary():
+    data = request.get_json()
+    itinerary_text = data.get('itinerary')
+    tour_id = data.get('tour_id')
+
+    tour = Tour.query.get(tour_id)
+    if tour is None:
+        return jsonify({'error': 'Invalid tour_id'}), 404
+
+    new_itinerary = Itinerary(itinerary=itinerary_text, tour_id=tour_id)
+    db.session.add(new_itinerary)
+    db.session.commit()
+
+    return jsonify({'message': 'Itinerary created successfully', 'id': new_itinerary.id}), 201
+
+
+@app.route('/itineraries/<int:itinerary_id>', methods=['PUT'])
+def update_itinerary(itinerary_id):
+    data = request.get_json()
+    itinerary_text = data.get('itinerary')
+    tour_id = data.get('tour_id')
+
+    itinerary = Itinerary.query.get_or_404(itinerary_id)
+
+    tour = Tour.query.get(tour_id)
+    if tour is None:
+        return jsonify({'error': 'Invalid tour_id'}), 404
+
+    itinerary.itinerary = itinerary_text
+    itinerary.tour_id = tour_id
+    db.session.commit()
+
+    return jsonify({'message': 'Itinerary updated successfully'})
+
+@app.route('/itineraries/<int:itineraries_id>', methods=['DELETE'])
+def delete_itinerary(itineraries_id):
+    itinerary = Itinerary.query.get_or_404(itineraries_id)
+    db.session.delete(itinerary)
+    db.session.commit()
+    return jsonify({'message': 'Itinerary deleted successfully'})
+
 @app.route('/highlights', methods=['GET'])
 def get_highlights():
     highlights = HighLight.query.all()
@@ -100,6 +172,7 @@ def get_highlights():
         }
         highlight_list.append(highlight_data)
     return jsonify(highlight_list)
+
 
 @app.route('/users', methods=['GET'])
 def get_users():
@@ -191,10 +264,14 @@ def populate_data():
     db.session.add(comment2)
     db.session.commit()
     
+def drop_all_tables():
+    db.drop_all()
+    
 # Insert dummy data
 if __name__ == '__main__':
     with app.app_context():
         print("pass")
+        drop_all_tables()
         db.create_all()
         populate_data()
     app.run()

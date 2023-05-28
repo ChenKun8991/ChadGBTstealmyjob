@@ -1,23 +1,27 @@
-from flask import Flask
+from flask import Flask, render_template, url_for, request, redirect
 from flask_sqlalchemy import SQLAlchemy
-
+from datetime import datetime
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:s9927714i@localhost/mydatabase'
-db = SQLAlchemy(app)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:password123@localhost/mysql'
 
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), nullable=False)
-    email = db.Column(db.String(50), nullable=False)
-    created_at = db.Column(db.TIMESTAMP, server_default=db.func.current_timestamp(), nullable=False)
+
+mysql = SQLAlchemy(app)
 
 @app.route('/')
 def index():
-    # Create all tables defined in the models
-    db.create_all()
+    # Perform a MySQL query
+    cur = mysql.connection.cursor()
+    cur.execute('SELECT * FROM users')
+    results = cur.fetchall()
+    cur.close()
     
-    return "Tables created successfully!"
+    # Process the query results
+    output = ''
+    for row in results:
+        output += f'ID: {row[0]}, Name: {row[1]}, Email: {row[2]}\n'
+        
+    return output
 
 if __name__ == '__main__':
     app.run()

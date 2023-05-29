@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request, Blueprint, send_file
+from werkzeug.utils import secure_filename
 import bcrypt
 from flask import (
     Flask,
@@ -24,6 +25,13 @@ from .extensions import db
 
 # Create a blueprint instance
 api_bp = Blueprint('models', __name__)
+
+# Set the upload folder path
+UPLOAD_FOLDER = 'C:/lifehack2023'
+
+# Configure the Flask app
+app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 class Tour(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -479,6 +487,40 @@ def download_video(video_id):
     else:
         # Return an appropriate response if the video ID is not found
         return jsonify({"error": "Video not found"}), 404
+
+@api_bp.route('/videos/upload', methods=['POST'])
+def upload_video():
+    if 'file' not in request.files:
+        return jsonify({"error": "No file provided"}), 400
+
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({"error": "No file selected"}), 400
+
+    if file and allowed_file(file.filename):
+        # Secure the filename to prevent any malicious file names
+        filename = secure_filename(file.filename)
+
+        # Remove the file extension from the filename
+        name = os.path.splitext(filename)[0]
+
+        # Save the uploaded file
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+        # Create a new Video instance and save it to the database
+        video = Video(name=name, thumb_up=0, view_count=0, link=filename, p_link="null", user_id=1)
+        db.session.add(video)
+        db.session.commit()
+
+        return jsonify({"message": "Video uploaded successfully"}), 201
+    else:
+        return jsonify({"error": "Invalid file format"}), 400
+
+def allowed_file(filename):
+    # Check if the file extension is allowed (e.g., mp4, mov, etc.)
+    ALLOWED_EXTENSIONS = {'mp4', 'mov'}
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @api_bp.route('/videos/user/<int:user_id>', methods=['GET'])
 def get_videos_by_user(user_id):

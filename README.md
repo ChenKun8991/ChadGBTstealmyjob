@@ -16,4 +16,4 @@
 
 #exit()
 
-#python app.py
+#py run.py

@@ -631,16 +631,16 @@ def populate_data():
                  selfIntro =" Bla bla bla",
                  password = hash_password("password123"))
     
-    user2 = User(name='Ching Meng', email='chenkun8991@gmail.com', created_at=datetime.now(), link="https://withlocals-com-res.cloudinary.com/image/upload/w_806,h_453,c_fill,g_auto,q_auto,dpr_2.0,f_auto/71664a40965a4d7b48d671c4801cf413", 
+    user4 = User(name='Ching Meng', email='chenkun8991@gmail.com', created_at=datetime.now(), link="https://withlocals-com-res.cloudinary.com/image/upload/w_806,h_453,c_fill,g_auto,q_auto,dpr_2.0,f_auto/71664a40965a4d7b48d671c4801cf413", 
                  type="admin", languageSpoken = "English, Chinese",
                  selfIntro ="Meet me, roam the colourful streets, taste the local foods and enjoy the scenery. May you bring back the fond memories of the city with you.",
                  password = hash_password("password123"))
     
-    selfIntro = db.Column(db.String(200), nullable=True)
-    
+
     db.session.add(user1)
     db.session.add(user2)
     db.session.add(user3)
+    db.session.add(user4)
 
     # Create and insert dummy data for Tour table
     tour1 = Tour(name='SMU Tour', rating=4.9, 

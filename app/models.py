@@ -115,18 +115,32 @@ class Comment(db.Model):
 session_user_mapping = {}
 
 ## LOGIN
+## LOGIN
 @api_bp.route('/login', methods=['POST'])
 def login():
     email = request.json.get('email')
     password = request.json.get('password')
 
     user = User.query.filter_by(email=email).first()
-    if user and checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
-        session_id = secrets.token_hex(16)  # Generate a random and secure session ID
-        session_user_mapping[session_id] = user.id  # Store session ID and user ID in the mapping dictionary
-        return jsonify({'message': 'Login successful', 'session_id': session_id})
+    if user:
+        if checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
+            session['user_id'] = user.id  # Save the user ID in the session
+            session_id = secrets.token_hex(16)  # Generate a random and secure session ID
+            session_user_mapping[session_id] = user.id  # Store session ID and user ID in the mapping dictionary
+            
+            # Return user_id and user_email in the response
+            return jsonify({
+                'message': 'Login successful',
+                'session_id': session_id,
+                'user_id': user.id,
+                'user_email': user.email
+            })
+        else:
+            return jsonify({'error': 'Invalid credentials'}), 401
     else:
-        return jsonify({'error': 'Invalid credentials'}), 401
+        return jsonify({'error': 'User not found'}), 404
+
+
 
 @api_bp.route('/register', methods=['POST'])
 def register():

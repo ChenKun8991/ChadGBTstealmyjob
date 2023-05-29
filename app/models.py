@@ -156,11 +156,8 @@ def protected():
 
         return jsonify({'message': 'Access granted'})
     else:
-<<<<<<< Updated upstream
-=======
         # Session ID doesn't match or not found, indicate an invalid session ID
         
->>>>>>> Stashed changes
         return jsonify({'error': 'Invalid session ID'}), 401
 ## Bookings CR
 @api_bp.route('/bookings/user/<int:user_id>', methods=['GET'])

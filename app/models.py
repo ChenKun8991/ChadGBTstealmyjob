@@ -618,7 +618,6 @@ def delete_comment(comment_id):
     db.session.commit()
     return jsonify({'message': 'Comment deleted successfully'})
 
-@api_bp.route('populate')
 def populate_data():
     # Create and insert dummy data for User table
     user1 = User(name='DAI Bing Tian', email='btdai@smu.edu.sg', created_at=datetime.now(), link="https://i0.wp.com/masterclass.sg/wp-content/uploads/2022/06/Brown-Bag-Jul-2022_Speaker-12-Jul.png?w=300&ssl=1", type="admin", languageSpoken = "English, Chinese", 

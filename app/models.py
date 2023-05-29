@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, Blueprint
+from flask import Flask, jsonify, request, Blueprint, send_file
 import bcrypt
 from flask import (
     Flask,
@@ -464,6 +464,22 @@ def get_videos(video_id=None):
         }
         return jsonify(video_data)
 
+@api_bp.route('/videos/download/<video_id>', methods=['GET'])
+def download_video(video_id):
+
+    # Fetch the video by ID using Video.query
+    video = Video.query.get(video_id)
+
+    if video:
+        # Assuming the file path is stored in the 'file_path' attribute of the Video model
+        video_file_path = "C:/lifehack2023/" + video.link
+
+        # Send the video file as a response
+        return send_file(video_file_path, mimetype='video/mp4')
+    else:
+        # Return an appropriate response if the video ID is not found
+        return jsonify({"error": "Video not found"}), 404
+
 @api_bp.route('/videos/user/<int:user_id>', methods=['GET'])
 def get_videos_by_user(user_id):
     videos = Video.query.filter_by(user_id=user_id).all()
@@ -697,11 +713,13 @@ def populate_data():
     db.session.add(highlight2_1)
 
     # Create and insert dummy data for Video table
-    video1 = Video(name='Video 1', thumb_up=0, view_count=0, link='video1.mp4', p_link="smu/video_cover_01", user_id=1)
-    video2 = Video(name='Video 2', thumb_up=0, view_count=0, link='video2.mp4', p_link="nus/video_cover_01", user_id=2)
+    video1 = Video(name='SMU Tour', thumb_up=0, view_count=0, link='smu.mp4', p_link="https://i.ytimg.com/vi/8EUX0DzJmKM/hq720.jpg", user_id=1)
+    video2 = Video(name='NUS Tour', thumb_up=0, view_count=0, link='nus.mp4', p_link="https://i.ytimg.com/vi/Mk4l9ZVF-MI/hq720.jpg?", user_id=2)
+    video3 = Video(name='NTU Tour', thumb_up=0, view_count=0, link='ntu.mp4', p_link="https://i.ytimg.com/vi/QIRkQ2zsrU8/hq720.jpg", user_id=3)
     
     db.session.add(video1)
     db.session.add(video2)
+    db.session.add(video3)
 
     # Create and insert dummy data for Comment table
     comment1 = Comment(description='Great tour', video_id=1, user_id=1)

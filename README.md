@@ -17,3 +17,7 @@
 #exit()
 
 #py run.py
+
+#ER Diagram
+
+<img src="https://i.imgur.com/1FuMuwN.png" alt="Image description">

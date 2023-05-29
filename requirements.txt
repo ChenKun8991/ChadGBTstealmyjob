@@ -1,3 +1,4 @@
+bcrypt==4.0.1
 blinker==1.6.2
 certifi==2022.12.7
 cffi==1.15.1
@@ -17,12 +18,19 @@ itsdangerous==2.1.2
 Jinja2==3.1.2
 jwcrypto==1.4.2
 MarkupSafe==2.1.2
+mysqlclient==2.1.1
+Naked==0.1.32
 platformdirs==2.5.4
+pyasn1==0.5.0
 pycparser==2.21
 pycryptodome==3.17
+PyMySQL==1.0.3
 python-dotenv==1.0.0
+PyYAML==6.0
 requests==2.31.0
+rsa==4.9
 sgid-client==0.1.1
+shellescape==3.8.1
 six==1.16.0
 SQLAlchemy==2.0.15
 typing_extensions==4.6.2

@@ -1,6 +1,7 @@
-from flask import Flask, jsonify, request, Blueprint, send_file
+from flask import Flask, jsonify, request, Blueprint, send_file, session
 from werkzeug.utils import secure_filename
 import bcrypt
+from bcrypt import checkpw, gensalt, hashpw
 from flask import (
     Flask,
     request,
@@ -94,6 +95,46 @@ class Comment(db.Model):
     user = db.relationship('User', backref=db.backref('comments', cascade='all, delete', lazy=True))
 
 ## Routing 
+
+## LOGIN
+@api_bp.route('/login', methods=['POST'])
+def login():
+    email = request.json.get('email')
+    password = request.json.get('password')
+
+    user = User.query.filter_by(email=email).first()
+    if checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
+        session['user_id'] = user.id  # Store user ID in the session
+        return jsonify({'message': 'Login successful', 'session_id': session.sid})
+    else:
+        return jsonify({'error': 'Invalid credentials'}), 401
+
+@api_bp.route('/register', methods=['POST'])
+def register():
+    username = request.json.get('username')
+    password = request.json.get('password')
+
+    # Hash the password before storing it
+    hashed_password = hashpw(password.encode('utf-8'), gensalt()).decode('utf-8')
+
+    # Create a new User instance and save it to the database
+    user = User(username=username, password=hashed_password)
+    db.session.add(user)
+    db.session.commit()
+
+    return jsonify({'message': 'User registered successfully'})
+
+@api_bp.route('/protected', methods=['GET'])
+def protected():
+    session_id = session.sid
+    client_session_id = request.headers.get('session-id')
+
+    if session_id == client_session_id:
+        # Session ID matches, the user sent the correct session ID
+        return jsonify({'message': 'Access granted'})
+    else:
+        # Session ID doesn't match, the user sent an incorrect session ID
+        return jsonify({'error': 'Invalid session ID'}), 401
 
 ## Tours CRUD
 @api_bp.route('/tours', methods=['GET'])

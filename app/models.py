@@ -52,11 +52,14 @@ class HighLight(db.Model):
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), nullable=False)
     email = db.Column(db.String(50), nullable=False, unique=True)
-    link = db.Column(db.String(200), nullable=False)
-    thumb_up = db.Column(db.Integer, nullable=False)  
-
+    type = db.Column(db.String(50), nullable=False)
+    
+    name = db.Column(db.String(50), nullable=True)
+    link = db.Column(db.String(200), nullable=True)
+    languageSpoken = db.Column(db.String(200), nullable=True)
+    selfIntro = db.Column(db.String(200), nullable=True)
+    
     created_at = db.Column(db.TIMESTAMP, server_default=db.func.current_timestamp(), nullable=False)
 
 class Video(db.Model):
@@ -320,7 +323,7 @@ def delete_highlight(highlight_id):
     db.session.commit()
 
     return jsonify({'message': 'Highlight deleted successfully'})
-
+    
 ## Users CRUD
 @api_bp.route('/users', methods=['GET'])
 @api_bp.route('/users/<int:user_id>', methods=['GET'])
@@ -331,10 +334,13 @@ def get_users(user_id=None):
         for user in users:
             user_data = {
                 'id': user.id,
-                'name': user.name,
                 'email': user.email,
-                'created_at': user.created_at,
+                'type': user.type,
+                'name': user.name,
                 'link': user.link,
+                'languageSpoken': user.languageSpoken,
+                'selfIntro': user.selfIntro,
+                'created_at': user.created_at,
                 # Add more fields if needed
             }
             user_list.append(user_data)
@@ -343,25 +349,52 @@ def get_users(user_id=None):
         user = User.query.get_or_404(user_id)
         user_data = {
             'id': user.id,
-            'name': user.name,
             'email': user.email,
-            'created_at': user.created_at,
+            'type': user.type,
+            'name': user.name,
             'link': user.link,
+            'languageSpoken': user.languageSpoken,
+            'selfIntro': user.selfIntro,
+            'created_at': user.created_at,
             # Add more fields if needed
         }
         return jsonify(user_data)
 
+@api_bp.route('/users/admin', methods=['GET'])
+def get_admin_users():
+    users = User.query.all()
+    user_list = []
+    for user in users:
+        if user.type == "admin":
+            user_data = {
+                'id': user.id,
+                'email': user.email,
+                'type': user.type,
+                'name': user.name,
+                'link': user.link,
+                'languageSpoken': user.languageSpoken,
+                'selfIntro': user.selfIntro,
+                'created_at': user.created_at,
+                # Add more fields if needed
+            }
+            user_list.append(user_data)
+    return jsonify(user_list)
+        
 @api_bp.route('/users', methods=['POST'])
 def create_user():
     data = request.get_json()
-    name = data.get('name')
     email = data.get('email')
+    type = data.get('type')
+    name = data.get('name')
     link = data.get('link')
+    languageSpoken = data.get('languageSpoken')
+    selfIntro = data.get('selfIntro')
 
-    if not name or not email or not link:
-        return jsonify({'message': 'Name, email and photo are required'}), 400
-
-    new_user = User(name=name, email=email, link=link)
+    if not email:
+        return jsonify({'message': 'Email are required'}), 400
+    if not type:
+        type = "regular"
+    new_user = User(name=name, email=email, type=type, link=link, languageSpoken = languageSpoken, selfIntro=selfIntro)
     db.session.add(new_user)
     db.session.commit()
 
@@ -580,9 +613,13 @@ def delete_comment(comment_id):
 
 def populate_data():
     # Create and insert dummy data for User table
-    user1 = User(name='DAI Bing Tian', email='btdai@smu.edu.sg', created_at=datetime.now(), link="smu/01")
-    user2 = User(name='Divesh AGGARWAL', email='divesh@comp.nus.edu.sg', created_at=datetime.now(), link="nus/01")
-
+    user1 = User(name='DAI Bing Tian', email='btdai@smu.edu.sg', created_at=datetime.now(), link="smu/01", type="admin", languageSpoken = "English, Chinese", 
+                 selfIntro ="My primary research interests are data mining and machine learning. It is interesting to discover insights from data and to explain insights from data and models.")
+    user2 = User(name='Divesh AGGARWAL', email='divesh@comp.nus.edu.sg', created_at=datetime.now(), link="nus/01", type="admin", languageSpoken = "English, Tamil",
+                 selfIntro =" A primary focus has been to understand the time complexity and the relation between the computational complexity of various computational problems, particularly lattice problems.")
+    
+    selfIntro = db.Column(db.String(200), nullable=True)
+    
     db.session.add(user1)
     db.session.add(user2)
 

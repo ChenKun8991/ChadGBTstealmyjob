@@ -12,7 +12,7 @@ def create_app():
     app = Flask(__name__)
     CORS(app)
 
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:password123@localhost/mydatabase'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:s9927714i@localhost/mydatabase'
 
     with app.app_context():
         # Allow app to interact with demo frontend

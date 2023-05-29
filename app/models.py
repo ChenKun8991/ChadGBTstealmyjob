@@ -624,10 +624,10 @@ def populate_data():
     user1 = User(name='DAI Bing Tian', email='btdai@smu.edu.sg', created_at=datetime.now(), link="https://i0.wp.com/masterclass.sg/wp-content/uploads/2022/06/Brown-Bag-Jul-2022_Speaker-12-Jul.png?w=300&ssl=1", type="admin", languageSpoken = "English, Chinese", 
                  selfIntro ="My primary research interests are data mining and machine learning. It is interesting to discover insights from data and to explain insights from data and models.",
                  password = hash_password("password123"))
-    user2 = User(name='Divesh AGGARWAL', email='divesh@comp.nus.edu.sg', created_at=datetime.now(), link="images/profile2", type="admin", languageSpoken = "English, Tamil",
+    user2 = User(name='Divesh AGGARWAL', email='divesh@comp.nus.edu.sg', created_at=datetime.now(), link="https://www.quantumlah.org/images/people/621.jpg", type="admin", languageSpoken = "English, Tamil",
                  selfIntro =" A primary focus has been to understand the time complexity and the relation between the computational complexity of various computational problems, particularly lattice problems.",
                  password = hash_password("password123"))
-    user3 = User(name='Dummy3', email='dummy3@comp.nus.edu.sg', created_at=datetime.now(), link="kkk/01", type="admin", languageSpoken = "English, Tamil",
+    user3 = User(name='Dummy3', email='dummy3@comp.nus.edu.sg', created_at=datetime.now(), link="https://onecms-res.cloudinary.com/image/upload/s--TmPnD0rz--/f_auto,q_auto/c_fill,g_auto,h_622,w_830/v1/tdy-migration/30429095_1.JPG", type="admin", languageSpoken = "English, Tamil",
                  selfIntro =" Bla bla bla",
                  password = hash_password("password123"))
     

@@ -715,6 +715,7 @@ def populate_data():
     
 def drop_all_tables():
     db.drop_all()
+    db.create_all()
     
 def hash_password(password):
     salt = bcrypt.gensalt()

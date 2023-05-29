@@ -4,11 +4,13 @@ from dotenv import load_dotenv
 import os
 from flask_cors import CORS
 from .extensions import db
+from flask_cors import CORS
 
 load_dotenv()
 
 def create_app():
     app = Flask(__name__)
+    CORS(app)
 
     app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:password123@localhost/mydatabase'
 

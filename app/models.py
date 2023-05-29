@@ -82,7 +82,7 @@ class Video(db.Model):
     created_at = db.Column(db.TIMESTAMP, server_default=db.func.current_timestamp(), nullable=False)
     link = db.Column(db.String(200), nullable=False)
     p_link = db.Column(db.String(200), nullable=False)
-    description = db.Column(db.String(2000), nullable=False)
+    description = db.Column(db.String(2000), nullable=True)
 
     
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)

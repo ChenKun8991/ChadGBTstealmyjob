@@ -32,6 +32,7 @@ UPLOAD_FOLDER = 'C:/lifehack2023'
 
 # Configure the Flask app
 app = Flask(__name__)
+app.secret_key = 'your_secret_key'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 class Tour(db.Model):
@@ -126,14 +127,14 @@ def register():
 
 @api_bp.route('/protected', methods=['GET'])
 def protected():
-    session_id = session.sid
     client_session_id = request.headers.get('session-id')
+    stored_session_id = session.get('session_id')
 
-    if session_id == client_session_id:
+    if stored_session_id and stored_session_id == client_session_id:
         # Session ID matches, the user sent the correct session ID
         return jsonify({'message': 'Access granted'})
     else:
-        # Session ID doesn't match, the user sent an incorrect session ID
+        # Session ID doesn't match or not found, indicate an invalid session ID
         return jsonify({'error': 'Invalid session ID'}), 401
 
 ## Tours CRUD

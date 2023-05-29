@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request, Blueprint, send_file, session
 from werkzeug.utils import secure_filename
 import bcrypt
+import secrets
 from bcrypt import checkpw, gensalt, hashpw
 from flask import (
     Flask,
@@ -32,7 +33,7 @@ UPLOAD_FOLDER = 'C:/lifehack2023'
 
 # Configure the Flask app
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'
+app.secret_key = 'fj23838ewkiei23ji3i2u'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 class Tour(db.Model):
@@ -99,6 +100,9 @@ class Comment(db.Model):
 
 ## Routing 
 
+# Create a dictionary to store session ID and user ID mapping
+session_user_mapping = {}
+
 ## LOGIN
 @api_bp.route('/login', methods=['POST'])
 def login():
@@ -106,22 +110,23 @@ def login():
     password = request.json.get('password')
 
     user = User.query.filter_by(email=email).first()
-    if checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
-        session['user_id'] = user.id  # Store user ID in the session
-        return jsonify({'message': 'Login successful', 'session_id': session.sid})
+    if user and checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
+        session_id = secrets.token_hex(16)  # Generate a random and secure session ID
+        session_user_mapping[session_id] = user.id  # Store session ID and user ID in the mapping dictionary
+        return jsonify({'message': 'Login successful', 'session_id': session_id})
     else:
         return jsonify({'error': 'Invalid credentials'}), 401
 
 @api_bp.route('/register', methods=['POST'])
 def register():
-    username = request.json.get('username')
+    email = request.json.get('email')
     password = request.json.get('password')
 
     # Hash the password before storing it
     hashed_password = hashpw(password.encode('utf-8'), gensalt()).decode('utf-8')
 
     # Create a new User instance and save it to the database
-    user = User(username=username, password=hashed_password)
+    user = User(email=email, password=hashed_password)
     db.session.add(user)
     db.session.commit()
 
@@ -130,13 +135,16 @@ def register():
 @api_bp.route('/protected', methods=['GET'])
 def protected():
     client_session_id = request.headers.get('session-id')
-    stored_session_id = session.get('session_id')
 
-    if stored_session_id and stored_session_id == client_session_id:
-        # Session ID matches, the user sent the correct session ID
+    if client_session_id in session_user_mapping:
+        user_id = session_user_mapping[client_session_id]
+        # Retrieve the user ID associated with the session ID
+
+        # ... do something with the user ID
+        print(user_id)
+
         return jsonify({'message': 'Access granted'})
     else:
-        # Session ID doesn't match or not found, indicate an invalid session ID
         return jsonify({'error': 'Invalid session ID'}), 401
 
 ## Tours CRUD

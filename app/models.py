@@ -36,6 +36,17 @@ app = Flask(__name__)
 app.secret_key = 'fj23838ewkiei23ji3i2u'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+class Booking(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    pax = db.Column(db.Integer, nullable=False)
+    booking_date = db.Column(db.TIMESTAMP, nullable=False)
+    
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user = db.relationship('User', backref=db.backref('bookings', cascade='all, delete', lazy=True))
+    
+    tour_id = db.Column(db.Integer, db.ForeignKey('tour.id'), nullable=False)
+    tour = db.relationship('Tour', backref=db.backref('bookings', cascade='all, delete', lazy=True))
+    
 class Tour(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
@@ -145,7 +156,49 @@ def protected():
 
         return jsonify({'message': 'Access granted'})
     else:
+<<<<<<< Updated upstream
+=======
+        # Session ID doesn't match or not found, indicate an invalid session ID
+        
+>>>>>>> Stashed changes
         return jsonify({'error': 'Invalid session ID'}), 401
+## Bookings CR
+@api_bp.route('/bookings/user/<int:user_id>', methods=['GET'])
+def get_bookings_by_user(user_id):
+    bookings = Booking.query.filter_by(user_id=user_id).all()
+    booking_list = []
+    for booking in bookings:
+        booking_data = {
+            'id': booking.id,
+            'pax': booking.pax,
+            'booking_date': booking.booking_date,
+            'user_id': booking.user_id,
+            'tour_id': booking.tour_id
+            # Add more fields if needed
+        }
+        booking_list.append(booking_data)
+    return jsonify(booking_list)
+#     return jsonify({'message': 'Tour created successfully', 'id': new_tour.id}), 201
+
+@api_bp.route('/bookings', methods=['POST'])
+def create_booking():
+    data = request.get_json()
+    
+    # Extract required fields from the request data
+    pax = data.get('pax')
+    booking_date = data.get('booking_date')
+    user_id = data.get('user_id')
+    tour_id = data.get('tour_id')
+    
+    if not pax or not booking_date or not user_id or not tour_id:
+        return jsonify({'message': 'Missing required fields'}), 400
+    
+    booking = Booking(pax=pax, booking_date=booking_date, user_id=user_id, tour_id=tour_id)
+    
+    db.session.add(booking)
+    db.session.commit()
+    
+    return jsonify({'message': 'Booking created successfully', 'id': booking.id}), 201
 
 ## Tours CRUD
 @api_bp.route('/tours', methods=['GET'])

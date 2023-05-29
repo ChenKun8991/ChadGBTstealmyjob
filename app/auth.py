@@ -22,7 +22,7 @@ from datetime import datetime
 app = current_app
 
 # Allow app to interact with demo frontend
-frontend_host = os.getenv("SGID_FRONTEND_HOST") or "http://localhost:5173"
+frontend_host = "http://localhost:3000"
 
 # In-memory store for user session data
 # In a real application, this would be a database.
@@ -37,7 +37,7 @@ sgid_client = SgidClient(
     client_id=os.getenv("SGID_CLIENT_ID"),
     client_secret=os.getenv("SGID_CLIENT_SECRET"),
     private_key=os.getenv("SGID_PRIVATE_KEY"),
-    redirect_uri="http://localhost:5001/api/redirect",
+    redirect_uri="http://localhost:5000/auth/redirect",
 )
 
 ## START OF SGID

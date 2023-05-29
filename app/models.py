@@ -92,7 +92,7 @@ class Video(db.Model):
     view_count  = db.Column(db.Integer, nullable=False) 
     created_at = db.Column(db.TIMESTAMP, server_default=db.func.current_timestamp(), nullable=False)
     link = db.Column(db.String(200), nullable=False)
-    p_link = db.Column(db.String(200), nullable=False)
+    p_link = db.Column(db.String(2000), nullable=False)
     description = db.Column(db.String(2000), nullable=True)
 
     
@@ -610,9 +610,9 @@ def upload_video():
 
         # Save the uploaded file
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-
+        app.logger.info('%s failed to log in', request)
         # Create a new Video instance and save it to the database
-        video = Video(name=name, thumb_up=0, view_count=0, link=filename, p_link="null", user_id=1)
+        video = Video(name=name, thumb_up=0, view_count=0, link=filename, p_link=request.form['p_link'], user_id=1, description= request.form['description'])
         db.session.add(video)
         db.session.commit()
 

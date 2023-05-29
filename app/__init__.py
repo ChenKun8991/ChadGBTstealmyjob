@@ -12,13 +12,14 @@ def create_app():
     app = Flask(__name__)
     CORS(app)
 
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:password123@localhost/mydatabase'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:s9927714i@localhost/mydatabase'
 
     with app.app_context():
         # Allow app to interact with demo frontend
-        frontend_host = os.getenv("SGID_FRONTEND_HOST") or "http://localhost:5173"  
+        frontend_host = os.getenv("SGID_FRONTEND_HOST") or "http://localhost:3000"  
         # Initialize CORS within the application context
-        CORS(app, origins=[frontend_host], supports_credentials=True)
+        # CORS(app, origins=[frontend_host], supports_credentials=True)
+        CORS(app)
     
     db.init_app(app)
 

@@ -618,6 +618,7 @@ def delete_comment(comment_id):
     db.session.commit()
     return jsonify({'message': 'Comment deleted successfully'})
 
+@api_bp.route('populate')
 def populate_data():
     # Create and insert dummy data for User table
     user1 = User(name='DAI Bing Tian', email='btdai@smu.edu.sg', created_at=datetime.now(), link="https://i0.wp.com/masterclass.sg/wp-content/uploads/2022/06/Brown-Bag-Jul-2022_Speaker-12-Jul.png?w=300&ssl=1", type="admin", languageSpoken = "English, Chinese", 
@@ -625,6 +626,9 @@ def populate_data():
                  password = hash_password("password123"))
     user2 = User(name='Divesh AGGARWAL', email='divesh@comp.nus.edu.sg', created_at=datetime.now(), link="images/profile2", type="admin", languageSpoken = "English, Tamil",
                  selfIntro =" A primary focus has been to understand the time complexity and the relation between the computational complexity of various computational problems, particularly lattice problems.",
+                 password = hash_password("password123"))
+    user3 = User(name='Dummy3', email='dummy3@comp.nus.edu.sg', created_at=datetime.now(), link="kkk/01", type="admin", languageSpoken = "English, Tamil",
+                 selfIntro =" Bla bla bla",
                  password = hash_password("password123"))
     
     user2 = User(name='Ching Meng', email='chenkun8991@gmail.com', created_at=datetime.now(), link="https://withlocals-com-res.cloudinary.com/image/upload/w_806,h_453,c_fill,g_auto,q_auto,dpr_2.0,f_auto/71664a40965a4d7b48d671c4801cf413", 
@@ -636,6 +640,7 @@ def populate_data():
     
     db.session.add(user1)
     db.session.add(user2)
+    db.session.add(user3)
 
     # Create and insert dummy data for Tour table
     tour1 = Tour(name='SMU Tour', rating=4.9, 
@@ -705,6 +710,8 @@ def populate_data():
     db.session.add(comment1)
     db.session.add(comment2)
     db.session.commit()
+
+    return "done"
     
 def drop_all_tables():
     db.drop_all()

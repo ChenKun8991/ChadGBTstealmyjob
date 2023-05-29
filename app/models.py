@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request, Blueprint
-
+import bcrypt
 from flask import (
     Flask,
     request,
@@ -53,6 +53,7 @@ class HighLight(db.Model):
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(50), nullable=False, unique=True)
+    password = db.Column(db.String(200), nullable=False, unique=True)
     type = db.Column(db.String(50), nullable=False)
     
     name = db.Column(db.String(50), nullable=True)
@@ -335,6 +336,7 @@ def get_users(user_id=None):
             user_data = {
                 'id': user.id,
                 'email': user.email,
+                'password': user.password,
                 'type': user.type,
                 'name': user.name,
                 'link': user.link,
@@ -350,6 +352,7 @@ def get_users(user_id=None):
         user_data = {
             'id': user.id,
             'email': user.email,
+            'password': user.password,
             'type': user.type,
             'name': user.name,
             'link': user.link,
@@ -369,6 +372,7 @@ def get_admin_users():
             user_data = {
                 'id': user.id,
                 'email': user.email,
+                'password': user.password,
                 'type': user.type,
                 'name': user.name,
                 'link': user.link,
@@ -383,18 +387,21 @@ def get_admin_users():
 @api_bp.route('/users', methods=['POST'])
 def create_user():
     data = request.get_json()
+    
+    
     email = data.get('email')
+    password = data.get('password')
     type = data.get('type')
     name = data.get('name')
     link = data.get('link')
     languageSpoken = data.get('languageSpoken')
     selfIntro = data.get('selfIntro')
 
-    if not email:
-        return jsonify({'message': 'Email are required'}), 400
+    if not email or not password:
+        return jsonify({'message': 'Email and password are required'}), 400
     if not type:
         type = "regular"
-    new_user = User(name=name, email=email, type=type, link=link, languageSpoken = languageSpoken, selfIntro=selfIntro)
+    new_user = User(name=name, email=email, type=type, link=link, languageSpoken = languageSpoken, selfIntro=selfIntro, password = hash_password(password))
     db.session.add(new_user)
     db.session.commit()
 
@@ -614,9 +621,11 @@ def delete_comment(comment_id):
 def populate_data():
     # Create and insert dummy data for User table
     user1 = User(name='DAI Bing Tian', email='btdai@smu.edu.sg', created_at=datetime.now(), link="smu/01", type="admin", languageSpoken = "English, Chinese", 
-                 selfIntro ="My primary research interests are data mining and machine learning. It is interesting to discover insights from data and to explain insights from data and models.")
+                 selfIntro ="My primary research interests are data mining and machine learning. It is interesting to discover insights from data and to explain insights from data and models.",
+                 password = hash_password("password123"))
     user2 = User(name='Divesh AGGARWAL', email='divesh@comp.nus.edu.sg', created_at=datetime.now(), link="nus/01", type="admin", languageSpoken = "English, Tamil",
-                 selfIntro =" A primary focus has been to understand the time complexity and the relation between the computational complexity of various computational problems, particularly lattice problems.")
+                 selfIntro =" A primary focus has been to understand the time complexity and the relation between the computational complexity of various computational problems, particularly lattice problems.",
+                 password = hash_password("password123"))
     
     selfIntro = db.Column(db.String(200), nullable=True)
     
@@ -694,3 +703,7 @@ def populate_data():
     
 def drop_all_tables():
     db.drop_all()
+    
+def hash_password(password):
+    salt = bcrypt.gensalt()
+    return bcrypt.hashpw(password.encode('utf-8'), salt)

@@ -645,13 +645,13 @@ def populate_data():
     # Create and insert dummy data for Tour table
     tour1 = Tour(name='SMU Tour', rating=4.9, 
                  description='Dynamic city campus in bustling metropolis. Modern facilities, vibrant atmosphere, close to businesses and attractions. Endless opportunities.',
-                 created_at=datetime.now(), user_id=1, link = "picture/smu/01")
+                 created_at=datetime.now(), user_id=1, link = "https://www.smu.edu.sg/sites/default/files/inline-images/oss-banner.jpg")
     tour3 = Tour(name='NTU Tour', rating=4.1, 
                  description='NTU Tour.',
-                 created_at=datetime.now(), user_id=1,  link = "picture/ntu/01")
+                 created_at=datetime.now(), user_id=1,  link = "https://www.ntu.edu.sg/images/default-source/hub-news/the-hive820f7e6d-bd25-459d-a8ed-cebf6e9611a1.jpg?sfvrsn=c8360e6c_1")
     tour2 = Tour(name='NUS Tour', rating=4.3, 
                  description="Explore Singapore's prestigious National University of Singapore. Stunning campus, cutting-edge facilities, rich academic environment. Discover excellence in education and research."
-                 , created_at=datetime.now(), user_id=2, link = "picture/nus/01")
+                 , created_at=datetime.now(), user_id=2, link = "https://cde.nus.edu.sg/wp-content/uploads/2021/08/article-image-2048x1152-1.png")
 
     db.session.add(tour1)
     db.session.add(tour2)

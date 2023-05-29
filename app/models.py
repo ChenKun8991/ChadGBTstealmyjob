@@ -80,6 +80,8 @@ class Video(db.Model):
     created_at = db.Column(db.TIMESTAMP, server_default=db.func.current_timestamp(), nullable=False)
     link = db.Column(db.String(200), nullable=False)
     p_link = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.String(2000), nullable=False)
+
     
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship('User', backref=db.backref('videos', cascade='all, delete', lazy=True))
@@ -495,7 +497,8 @@ def get_videos(video_id=None):
                 'view_count': video.view_count,
                 'created_at': video.created_at,
                 'link': video.link,
-                'p_link': video.p_link
+                'p_link': video.p_link,
+                'description': video.description
                 # Add more fields if needed
             }
             video_list.append(video_data)
@@ -509,7 +512,8 @@ def get_videos(video_id=None):
             'view_count': video.view_count,
             'created_at': video.created_at,
             'link': video.link,
-            'p_link': video.p_link
+            'p_link': video.p_link,
+            'description': video.description
         }
         return jsonify(video_data)
 
@@ -576,7 +580,8 @@ def get_videos_by_user(user_id):
             'view_count': video.view_count,
             'created_at': video.created_at,
             'link': video.link,
-            'p_link': video.p_link
+            'p_link': video.p_link,
+            'description': video.description
             # Add more fields if needed
         }
         video_list.append(video_data)
@@ -585,8 +590,8 @@ def get_videos_by_user(user_id):
 
 @api_bp.route('/videos', methods=['POST'])
 def create_video():
-    data = request.get_json()
-    video = Video(name=data['name'], thumb_up=data['thumb_up'], view_count=data['view_count'], link=data['link'], user_id=data['user_id'], p_link=data['p_link'])
+    data = request.get_json(),
+    video = Video(name=data['name'], thumb_up=data['thumb_up'], view_count=data['view_count'], link=data['link'], user_id=data['user_id'], p_link=data['p_link'], description = data['description'])
     db.session.add(video)
     db.session.commit()
     return jsonify({'message': 'Video created successfully', 'id': video.id})
@@ -598,6 +603,7 @@ def update_video(video_id):
     video.name = data['name']
     video.thumb_up = data['thumb_up']
     video.view_count = data['view_count']
+    video.description = data['description']
     db.session.commit()
     return jsonify({'message': 'Video updated successfully'})
 
@@ -795,9 +801,12 @@ def populate_data():
     db.session.add(highlight2_1)
 
     # Create and insert dummy data for Video table
-    video1 = Video(name='SMU Tour', thumb_up=0, view_count=0, link='smu.mp4', p_link="https://i.ytimg.com/vi/8EUX0DzJmKM/hq720.jpg", user_id=1)
-    video2 = Video(name='NUS Tour', thumb_up=0, view_count=0, link='nus.mp4', p_link="https://i.ytimg.com/vi/Mk4l9ZVF-MI/hq720.jpg?", user_id=2)
-    video3 = Video(name='NTU Tour', thumb_up=0, view_count=0, link='ntu.mp4', p_link="https://i.ytimg.com/vi/QIRkQ2zsrU8/hq720.jpg", user_id=3)
+    video1 = Video(name='SMU Tour', thumb_up=0, view_count=10, link='smu.mp4', p_link="https://i.ytimg.com/vi/8EUX0DzJmKM/hq720.jpg", user_id=1, 
+                   description = "video 1 testTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT")
+    video2 = Video(name='NUS Tour', thumb_up=0, view_count=11, link='nus.mp4', p_link="https://i.ytimg.com/vi/Mk4l9ZVF-MI/hq720.jpg?", user_id=2, 
+                   description = "video 2 testEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE")
+    video3 = Video(name='NTU Tour', thumb_up=0, view_count=99, link='ntu.mp4', p_link="https://i.ytimg.com/vi/QIRkQ2zsrU8/hq720.jpg", user_id=3, 
+                   description = "video 3 testESSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS")
     
     db.session.add(video1)
     db.session.add(video2)
